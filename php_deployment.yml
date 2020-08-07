@@ -1,0 +1,84 @@
+apiVersion: v1
+
+kind: Service
+
+metadata:
+
+  name: myweb-php
+  labels:
+
+    app: myweb-php
+
+spec:
+
+  ports:
+
+    - port: 80
+      nodePort: 30100
+
+  selector:
+
+    app: myweb-php
+
+    tier: frontend
+
+  type: NodePort
+
+---
+
+apiVersion: v1
+
+kind: PersistentVolumeClaim
+
+metadata:
+
+  name: web-pvc1
+
+  labels:
+
+    app: myweb-php
+
+spec:
+
+  accessModes:
+
+    - ReadWriteOnce
+
+  resources:
+
+    requests:
+
+      storage: 20Gi
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: myweb-php
+spec:
+    selector:
+          matchLabels:
+              app: myweb-php
+              tier: frontend
+
+    template:
+        metadata:
+            name: myweb-php
+            labels:
+                app: myweb-php
+                tier: frontend
+
+        spec:
+            containers:
+                - name: myweb-php
+                  image: vimal13/apache-webserver-php
+                  volumeMounts: 
+                      - name: web-vol1
+                        mountPath: /var/www/html
+            volumes:
+                - name: web-vol1
+                  persistentVolumeClaim: 
+                      claimName: web-pvc1
+          
